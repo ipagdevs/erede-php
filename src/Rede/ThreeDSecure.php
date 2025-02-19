@@ -51,6 +51,11 @@ class ThreeDSecure implements RedeSerializable
     private string $userAgent;
 
     /**
+     * @var ?string
+     */
+    private ?string $ipAddress = null;
+
+    /**
      * @var bool
      */
     private bool $embedded;
@@ -69,6 +74,11 @@ class ThreeDSecure implements RedeSerializable
      * @var string|null
      */
     private ?string $challengePreference = null;
+
+    /**
+     * @var Address|null
+     */
+    private ?Address $billing = null;
 
     /**
      * ThreeDSecure constructor.
@@ -317,6 +327,42 @@ class ThreeDSecure implements RedeSerializable
     public function setChallengePreference(?string $challengePreference): ThreeDSecure
     {
         $this->challengePreference = $challengePreference;
+        return $this;
+    }
+
+    /**
+     * @return Address|null
+     */
+    public function getBilling(): ?Address
+    {
+        return $this->billing;
+    }
+
+    /**
+     * @param Address|null $billing
+     * @return ThreeDSecure
+     */
+    public function setBilling(?Address $billing): ThreeDSecure
+    {
+        $this->billing = $billing;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getIpAddress(): ?string
+    {
+        return $this->ipAddress;
+    }
+
+    /**
+     * @param string $ipAddress
+     * @return ThreeDSecure
+     */
+    public function setIpAddress(string $ipAddress): ThreeDSecure
+    {
+        $this->ipAddress = $ipAddress;
         return $this;
     }
 }

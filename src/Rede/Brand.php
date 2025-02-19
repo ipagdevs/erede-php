@@ -21,6 +21,16 @@ class Brand
     private ?string $returnMessage = null;
 
     /**
+     * @var string|null
+     */
+    private ?string $brandTid = null;
+
+    /**
+     * @var string|null
+     */
+    private ?string $authorizationCode = null;
+
+    /**
      * @return string|null
      */
     public function getName(): ?string
@@ -71,6 +81,42 @@ class Brand
     public function setReturnMessage(?string $returnMessage): Brand
     {
         $this->returnMessage = $returnMessage;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getBrandTid(): ?string
+    {
+        return $this->brandTid;
+    }
+
+    /**
+     * @param string|null $brandTid
+     * @return Brand
+     */
+    public function setBrandTid(?string $brandTid): Brand
+    {
+        $this->brandTid = $brandTid;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getAuthorizationCode(): ?string
+    {
+        return $this->authorizationCode;
+    }
+
+    /**
+     * @param string|null $authorizationCode
+     * @return Brand
+     */
+    public function setAuthorizationCode(?string $authorizationCode): Brand
+    {
+        $this->authorizationCode = $authorizationCode;
         return $this;
     }
 }
