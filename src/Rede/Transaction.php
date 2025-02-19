@@ -2,9 +2,9 @@
 
 namespace Rede;
 
-use ArrayIterator;
 use DateTime;
 use Exception;
+use ArrayIterator;
 use InvalidArgumentException;
 
 class Transaction implements RedeSerializable, RedeUnserializable
@@ -382,7 +382,7 @@ class Transaction implements RedeSerializable, RedeUnserializable
                 'additional' => $this->additional
             ],
             function ($value) {
-                return !is_null($value);
+                return !empty($value);
             }
         );
     }

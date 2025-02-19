@@ -1,11 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [[ ! -d vendor ]]; then
   echo "Vendor dir not found; running composer install"
   composer install
 fi
 
-if [[ ! -v REDE_PV ]] || [[ ! -v REDE_TOKEN ]]; then
+if [[ -z "$REDE_PV" ]] || [[ -z "$REDE_TOKEN" ]]; then
   echo "You need to define the environment variables REDE_PV AND REDE_TOKEN to continue"
   exit 1
 fi

@@ -1,6 +1,5 @@
 {
-  "name": "developersrede/erede-php",
-  "version": "5.2.1",
+  "name": "ipagdevs/erede-php",
   "description": "e.Rede integration SDK",
   "minimum-stability": "stable",
   "license": "MIT",
@@ -28,6 +27,10 @@
     {
       "name": "João Batista Neto",
       "email": "neto.joaobatista@gmail.com"
+    },
+    {
+        "name": "João Hernandes",
+        "email": "joao@ipag.com.br"
     }
   ]
 }
