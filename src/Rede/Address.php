@@ -4,7 +4,7 @@ namespace Rede;
 
 class Address implements RedeSerializable
 {
-    use SerializeTrait;
+    use SerializeTrait, CreateTrait;
 
     public const BILLING = 1;
     public const SHIPPING = 2;

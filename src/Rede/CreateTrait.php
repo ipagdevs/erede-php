@@ -21,14 +21,22 @@ trait CreateTrait
 
         foreach ($dataKeys as $property => $value) {
             if (array_key_exists($property, $objectKeys)) {
-                if ($property == 'requestDateTime' || $property == 'dateTime' || $property == 'refundDateTime') {
-                    $value = new DateTime($value);
-                }
+                $value = self::mapPropertyToObject($property, $value);
 
                 $object->{$property} = $value;
             }
         }
 
         return $object;
+    }
+
+    private static function mapPropertyToObject($property, mixed $value): mixed
+    {
+        return match ($property) {
+            'requestDateTime', 'dateTime', 'refundDateTime' => new DateTime($value),
+            'brand' => Brand::create($value),
+            'billing' => Address::create($value),
+            default => $value,
+        };
     }
 }
