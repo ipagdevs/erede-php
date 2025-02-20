@@ -35,7 +35,7 @@ trait CreateTrait
         return match ($property) {
             'requestDateTime', 'dateTime', 'refundDateTime' => new DateTime($value),
             'brand' => Brand::create($value),
-            'billing' => Address::create($value),
+            'billing' => Billing::create($value),
             default => $value,
         };
     }
