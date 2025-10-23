@@ -23,7 +23,7 @@ class Environment implements RedeSerializable
     /**
      * @var string
      */
-    private string $endpoint;
+    protected string $endpoint;
 
     /**
      * Creates an environment with its base url and version

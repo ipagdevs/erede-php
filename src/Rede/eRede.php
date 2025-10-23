@@ -3,10 +3,11 @@
 namespace Rede;
 
 use Psr\Log\LoggerInterface;
-use Rede\Service\CancelTransactionService;
-use Rede\Service\CaptureTransactionService;
-use Rede\Service\CreateTransactionService;
 use Rede\Service\GetTransactionService;
+use Rede\Service\CancelTransactionService;
+use Rede\Service\CreateTransactionService;
+use Rede\Service\CaptureTransactionService;
+use Rede\Service\OAuthAuthenticationService;
 
 /**
  * phpcs:disable Squiz.Classes.ValidClassName.NotCamelCaps
@@ -34,6 +35,27 @@ class eRede
      */
     public function __construct(private readonly Store $store, private readonly ?LoggerInterface $logger = null)
     {
+    }
+
+    public function generateOAuthToken(): AbstractAuthentication
+    {
+        $credentialsEnvironment = $this->store->getEnvironment()->getEndpoint('') === Environment::sandbox()->getEndpoint('')
+            ? CredentialsEnvironment::sandbox()
+            : CredentialsEnvironment::production();
+
+        $authentication = new BasicAuthentication($this->store, $credentialsEnvironment);
+
+        $service = new OAuthAuthenticationService($authentication, $this->logger);
+
+        $service->withHeaders([
+            'Content-Type: application/x-www-form-urlencoded',
+            'Content-Type: application/json; charset=utf8',
+            'Accept: application/json',
+        ]);
+
+        return $service->execute([
+            'grant_type' => 'client_credentials',
+        ]);
     }
 
     /**
