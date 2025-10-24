@@ -1,21 +1,22 @@
 <?php
 
-namespace Rede;
+namespace Rede\v2;
 
+use Rede\Store;
+use Rede\Transaction;
 use Psr\Log\LoggerInterface;
-use Rede\Service\CancelTransactionService;
-use Rede\Service\CaptureTransactionService;
-use Rede\Service\CreateTransactionService;
-use Rede\Service\GetTransactionService;
+use Rede\BasicAuthentication;
+use Rede\AbstractAuthentication;
+use Rede\CredentialsEnvironment;
+use Rede\v2\Contracts\eRedeInterface;
+use Rede\v2\Service\GetTransactionService;
+use Rede\Service\OAuthAuthenticationService;
+use Rede\v2\Service\CancelTransactionService;
+use Rede\v2\Service\CreateTransactionService;
+use Rede\v2\Service\CaptureTransactionService;
 
-/**
- * phpcs:disable Squiz.Classes.ValidClassName.NotCamelCaps
- */
-class eRede
+class eRede extends \Rede\eRede implements eRedeInterface
 {
-    public const VERSION = '6.1.0';
-    public const USER_AGENT = 'eRede/' . eRede::VERSION . ' (PHP %s; Store %s; %s %s) %s';
-
     /**
      * @var string|null
      */
@@ -26,14 +27,30 @@ class eRede
      */
     private ?string $platformVersion = null;
 
-    /**
-     * eRede constructor.
-     *
-     * @param Store                $store
-     * @param LoggerInterface|null $logger
-     */
     public function __construct(private readonly Store $store, private readonly ?LoggerInterface $logger = null)
     {
+        parent::__construct($store, $logger);
+    }
+
+    public function generateOAuthToken(): AbstractAuthentication
+    {
+        $credentialsEnvironment = $this->store->getEnvironment()->getEndpoint('') === Environment::sandbox()->getEndpoint('')
+            ? CredentialsEnvironment::sandbox()
+            : CredentialsEnvironment::production();
+
+        $authentication = new BasicAuthentication($this->store, $credentialsEnvironment);
+
+        $service = new OAuthAuthenticationService($authentication, $this->logger);
+
+        $service->withHeaders([
+            'Content-Type: application/x-www-form-urlencoded',
+            'Content-Type: application/json; charset=utf8',
+            'Accept: application/json',
+        ]);
+
+        return $service->execute([
+            'grant_type' => 'client_credentials',
+        ]);
     }
 
     /**
@@ -91,17 +108,6 @@ class eRede
      * @param string $tid
      *
      * @return Transaction
-     * @see    eRede::get()
-     */
-    public function getById(string $tid): Transaction
-    {
-        return $this->get($tid);
-    }
-
-    /**
-     * @param string $tid
-     *
-     * @return Transaction
      */
     public function get(string $tid): Transaction
     {
@@ -142,27 +148,6 @@ class eRede
         $service->setRefund();
 
         return $service->execute();
-    }
-
-    /**
-     * @param Transaction $transaction
-     *
-     * @return Transaction
-     */
-    public function zero(Transaction $transaction): Transaction
-    {
-        $amount = (int) $transaction->getAmount();
-        $capture = (bool)$transaction->getCapture();
-
-        $transaction->setAmount(0);
-        $transaction->capture();
-
-        $transaction = $this->create($transaction);
-
-        $transaction->setAmount($amount);
-        $transaction->capture($capture);
-
-        return $transaction;
     }
 
     /**

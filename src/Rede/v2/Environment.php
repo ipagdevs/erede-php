@@ -1,12 +1,12 @@
 <?php
 
-namespace Rede;
+namespace Rede\v2;
 
-class CredentialsEnvironment extends Environment
+class Environment extends \Rede\Environment
 {
-    public const PRODUCTION = 'https://api.userede.com.br/redelabs';
-    public const SANDBOX = 'https://rl7-sandbox-api.useredecloud.com.br';
-    public const VERSION = '';
+    public const PRODUCTION = 'https://api.userede.com.br/erede';
+    public const SANDBOX = 'https://sandbox-erede.useredecloud.com.br';
+    public const VERSION = 'v2';
 
     /**
      * @var string
@@ -39,18 +39,18 @@ class CredentialsEnvironment extends Environment
     }
 
     /**
-     * @return CredentialsEnvironment A preconfigured production environment
+     * @return Environment A preconfigured production environment
      */
-    public static function production(): CredentialsEnvironment
+    public static function production(): self
     {
-        return new CredentialsEnvironment(CredentialsEnvironment::PRODUCTION);
+        return new self(self::PRODUCTION);
     }
 
     /**
-     * @return CredentialsEnvironment A preconfigured sandbox environment
+     * @return Environment A preconfigured sandbox environment
      */
-    public static function sandbox(): CredentialsEnvironment
+    public static function sandbox(): self
     {
-        return new CredentialsEnvironment(CredentialsEnvironment::SANDBOX);
+        return new self(self::SANDBOX);
     }
 }

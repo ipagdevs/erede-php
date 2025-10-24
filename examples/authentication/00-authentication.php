@@ -1,7 +1,7 @@
 <?php
 
-use Rede\eRede;
-use Rede\Store;
+use Rede\v2\eRede;
+use Rede\v2\Store;
 use Monolog\Logger;
 use Psr\Log\LogLevel;
 use Rede\Environment;
@@ -9,9 +9,8 @@ use Monolog\Handler\StreamHandler;
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 
-$client_id = '';
-
-$client_secret = '';
+$client_id = getenv('EREDE_CLIENT_ID') ?: '';
+$client_secret = getenv('EREDE_CLIENT_SECRET') ?: '';
 
 $logger = new Logger('eRede');
 $logger->pushHandler(new StreamHandler('php://stdout', LogLevel::DEBUG));

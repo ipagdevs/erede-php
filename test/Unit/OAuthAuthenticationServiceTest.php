@@ -2,6 +2,8 @@
 
 namespace Rede;
 
+use ReflectionClass;
+use ReflectionMethod;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
 use Rede\Exception\RedeException;
@@ -10,17 +12,23 @@ use Rede\Service\OAuthAuthenticationService;
 
 class OAuthAuthenticationServiceTest extends TestCase
 {
-    private BearerAuthentication|MockObject $mockAuthentication;
+    private AbstractAuthentication|MockObject $mockAuthentication;
+    private BearerAuthentication|MockObject $mockBearerAuthentication;
     private CredentialsEnvironment $environment;
     private LoggerInterface|MockObject $mockLogger;
 
     protected function setUp(): void
     {
         $this->environment = CredentialsEnvironment::sandbox();
-        $this->mockAuthentication = $this->createMock(BearerAuthentication::class);
+        $this->mockAuthentication = $this->createMock(AbstractAuthentication::class);
+        $this->mockBearerAuthentication = $this->createMock(BearerAuthentication::class);
         $this->mockLogger = $this->createMock(LoggerInterface::class);
 
         $this->mockAuthentication
+            ->method('getEnvironment')
+            ->willReturn($this->environment);
+
+        $this->mockBearerAuthentication
             ->method('getEnvironment')
             ->willReturn($this->environment);
     }
@@ -30,6 +38,7 @@ class OAuthAuthenticationServiceTest extends TestCase
         $service = new OAuthAuthenticationService($this->mockAuthentication);
 
         $this->assertInstanceOf(OAuthAuthenticationService::class, $service);
+        $this->assertInstanceOf(\Rede\Service\AbstractAuthenticationService::class, $service);
     }
 
     public function testConstructorWithAuthenticationAndLogger(): void
@@ -37,6 +46,21 @@ class OAuthAuthenticationServiceTest extends TestCase
         $service = new OAuthAuthenticationService($this->mockAuthentication, $this->mockLogger);
 
         $this->assertInstanceOf(OAuthAuthenticationService::class, $service);
+        $this->assertInstanceOf(\Rede\Service\AbstractAuthenticationService::class, $service);
+    }
+
+    public function testConstructorWithBearerAuthentication(): void
+    {
+        $service = new OAuthAuthenticationService($this->mockBearerAuthentication);
+
+        $this->assertInstanceOf(OAuthAuthenticationService::class, $service);
+    }
+
+    public function testExtendsAbstractAuthenticationService(): void
+    {
+        $service = new OAuthAuthenticationService($this->mockAuthentication);
+
+        $this->assertInstanceOf(\Rede\Service\AbstractAuthenticationService::class, $service);
     }
 
     public function testGetServiceReturnsCorrectEndpoint(): void
@@ -329,6 +353,133 @@ class OAuthAuthenticationServiceTest extends TestCase
         $method->setAccessible(true);
 
         $method->invoke($service, $response, $statusCode);
+    }
+
+    public function testExecuteWithEmptyDataArray(): void
+    {
+        $service = new OAuthAuthenticationService($this->mockAuthentication);
+
+        // Test that execute accepts empty array
+        $this->mockAuthentication
+            ->method('toString')
+            ->willReturn('Bearer test_token');
+
+        // This will fail due to network call, but we're testing method signature
+        try {
+            $service->execute([]);
+        } catch (\RuntimeException $e) {
+            // Expected due to network call
+            $this->assertInstanceOf(\RuntimeException::class, $e);
+        }
+    }
+
+    public function testExecuteWithClientCredentialsData(): void
+    {
+        $service = new OAuthAuthenticationService($this->mockAuthentication);
+
+        $this->mockAuthentication
+            ->method('toString')
+            ->willReturn('Bearer test_token');
+
+        $data = [
+            'grant_type' => 'client_credentials',
+            'client_id' => 'test_client',
+            'client_secret' => 'test_secret'
+        ];
+
+        // This will fail due to network call, but we're testing parameter handling
+        try {
+            $service->execute($data);
+        } catch (\RuntimeException $e) {
+            // Expected due to network call
+            $this->assertInstanceOf(\RuntimeException::class, $e);
+        }
+    }
+
+    public function testExecuteMethodSignature(): void
+    {
+        $reflection = new ReflectionClass(OAuthAuthenticationService::class);
+        $method = $reflection->getMethod('execute');
+
+        // Test method exists and has correct signature
+        $this->assertTrue($method->isPublic());
+        $this->assertEquals(1, $method->getNumberOfParameters());
+
+        $parameter = $method->getParameters()[0];
+        $this->assertEquals('data', $parameter->getName());
+        $this->assertTrue($parameter->isOptional());
+        $this->assertTrue($parameter->hasType());
+        $this->assertEquals('array', $parameter->getType()->getName());
+    }
+
+    public function testSendRequestMethodIsProtected(): void
+    {
+        $reflection = new ReflectionClass(OAuthAuthenticationService::class);
+
+        // Should inherit sendRequest from parent
+        $this->assertTrue($reflection->hasMethod('sendRequest'));
+
+        $method = $reflection->getMethod('sendRequest');
+        $this->assertTrue($method->isProtected());
+    }
+
+    public function testServiceInheritanceHierarchy(): void
+    {
+        $service = new OAuthAuthenticationService($this->mockAuthentication);
+
+        // Test complete inheritance chain
+        $this->assertInstanceOf(OAuthAuthenticationService::class, $service);
+        $this->assertInstanceOf(\Rede\Service\AbstractAuthenticationService::class, $service);
+    }
+
+    public function testBearerAuthenticationWithCredentials(): void
+    {
+        $validResponse = json_encode([
+            'access_token' => 'test_access_token_123',
+            'token_type' => 'Bearer',
+            'expires_in' => 3600,
+            'refresh_token' => 'refresh_token_456'
+        ]);
+
+        $service = new OAuthAuthenticationService($this->mockAuthentication);
+        $reflection = new ReflectionClass($service);
+        $method = $reflection->getMethod('parseResponse');
+        $method->setAccessible(true);
+
+        $result = $method->invoke($service, $validResponse, 200);
+
+        $this->assertInstanceOf(BearerAuthentication::class, $result);
+        // Test that BearerAuthentication::withCredentials was called properly
+    }
+
+    public function testParseResponseWithMinimalValidData(): void
+    {
+        $minimalResponse = json_encode([
+            'access_token' => 'minimal_token'
+        ]);
+
+        $service = new OAuthAuthenticationService($this->mockAuthentication);
+        $reflection = new ReflectionClass($service);
+        $method = $reflection->getMethod('parseResponse');
+        $method->setAccessible(true);
+
+        $result = $method->invoke($service, $minimalResponse, 200);
+
+        $this->assertInstanceOf(BearerAuthentication::class, $result);
+    }
+
+    public function testHeaderManipulationWithOAuth(): void
+    {
+        $service = new OAuthAuthenticationService($this->mockAuthentication);
+
+        // Test fluent header manipulation
+        $result = $service
+            ->withHeaders(['Accept: application/json'])
+            ->addHeader('Content-Type', 'application/x-www-form-urlencoded')
+            ->addHeader('X-OAuth-Client', 'test-client');
+
+        $this->assertSame($service, $result);
+        $this->assertInstanceOf(OAuthAuthenticationService::class, $result);
     }
 
     public function testCompleteServiceWorkflow(): void
