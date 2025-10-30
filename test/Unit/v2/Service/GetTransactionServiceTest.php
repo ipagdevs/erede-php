@@ -2,32 +2,30 @@
 
 namespace Test\Unit\v2\Service;
 
+use Rede\v2\Store;
+use Rede\Environment;
+use Rede\Transaction;
+use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
 use Rede\v2\Service\GetTransactionService;
-use Rede\v2\Store;
-use Rede\Transaction;
-use Rede\Environment;
-use Psr\Log\LoggerInterface;
 
 class GetTransactionServiceTest extends TestCase
 {
     private Store $store;
-    private Transaction $transaction;
     private LoggerInterface $logger;
     private GetTransactionService $service;
 
     protected function setUp(): void
     {
         $this->store = new Store('filiation', 'password', Environment::sandbox());
-        $this->transaction = new Transaction();
-        $this->transaction->setTid('123456789');
         $this->logger = $this->createMock(LoggerInterface::class);
-        $this->service = new GetTransactionService($this->store, $this->transaction, $this->logger);
+        $this->service = new GetTransactionService(store: $this->store, logger: $this->logger);
+        $this->service->setTid('123456789');
     }
 
     public function testConstructor(): void
     {
-        $service = new GetTransactionService($this->store, $this->transaction, $this->logger);
+        $service = new GetTransactionService(store: $this->store, logger: $this->logger);
 
         $this->assertInstanceOf(GetTransactionService::class, $service);
     }
@@ -41,7 +39,7 @@ class GetTransactionServiceTest extends TestCase
 
     public function testConstructorWithoutLogger(): void
     {
-        $service = new GetTransactionService($this->store, $this->transaction);
+        $service = new GetTransactionService(store: $this->store);
 
         $this->assertInstanceOf(GetTransactionService::class, $service);
     }
@@ -49,30 +47,30 @@ class GetTransactionServiceTest extends TestCase
     public function testSetReference(): void
     {
         $reference = 'test-reference-123';
-        
+
         $result = $this->service->setReference($reference);
-        
+
         $this->assertSame($this->service, $result);
     }
 
     public function testSetRefund(): void
     {
         $result = $this->service->setRefund();
-        
+
         $this->assertSame($this->service, $result);
     }
 
     public function testSetRefundWithFalse(): void
     {
         $result = $this->service->setRefund(false);
-        
+
         $this->assertSame($this->service, $result);
     }
 
     public function testSetRefundWithTrue(): void
     {
         $result = $this->service->setRefund(true);
-        
+
         $this->assertSame($this->service, $result);
     }
 
@@ -166,7 +164,7 @@ class GetTransactionServiceTest extends TestCase
     {
         $reflection = new \ReflectionClass($this->service);
         $method = $reflection->getMethod('execute');
-        
+
         $this->assertEquals(GetTransactionService::class, $method->getDeclaringClass()->getName());
     }
 
@@ -174,7 +172,7 @@ class GetTransactionServiceTest extends TestCase
     {
         $reflection = new \ReflectionClass($this->service);
         $method = $reflection->getMethod('getService');
-        
+
         $this->assertEquals(GetTransactionService::class, $method->getDeclaringClass()->getName());
     }
 
@@ -211,9 +209,8 @@ class GetTransactionServiceTest extends TestCase
     public function testGetServiceWithDifferentTids(string $tid, bool $refund, string $expected): void
     {
         // Criar uma nova transaction para cada teste
-        $transaction = new Transaction();
-        $transaction->setTid($tid);
-        $service = new GetTransactionService($this->store, $transaction, $this->logger);
+        $service = new GetTransactionService(store: $this->store, logger:$this->logger);
+        $service->setTid($tid);
         $service->setRefund($refund);
 
         $reflection = new \ReflectionClass($service);
@@ -240,7 +237,7 @@ class GetTransactionServiceTest extends TestCase
     public function testHasReferenceProperty(): void
     {
         $reflection = new \ReflectionClass($this->service);
-        
+
         $this->assertTrue($reflection->hasProperty('reference'));
         $property = $reflection->getProperty('reference');
         $this->assertTrue($property->isPrivate());
@@ -249,7 +246,7 @@ class GetTransactionServiceTest extends TestCase
     public function testHasRefundProperty(): void
     {
         $reflection = new \ReflectionClass($this->service);
-        
+
         $this->assertTrue($reflection->hasProperty('refund'));
         $property = $reflection->getProperty('refund');
         $this->assertTrue($property->isPrivate());

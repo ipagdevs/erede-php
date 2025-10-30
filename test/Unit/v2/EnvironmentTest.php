@@ -69,14 +69,14 @@ class EnvironmentTest extends TestCase
     {
         $env = Environment::production();
 
-        $this->assertEquals('https://api.userede.com.br/erede/v2', $env->getEndpoint(''));
+        $this->assertEquals('https://api.userede.com.br/erede/v2/', $env->getEndpoint(''));
     }
 
     public function testSandboxEnvironmentEndpoint(): void
     {
         $env = Environment::sandbox();
 
-        $this->assertEquals('https://sandbox-erede.useredecloud.com.br/v2', $env->getEndpoint(''));
+        $this->assertEquals('https://sandbox-erede.useredecloud.com.br/v2/', $env->getEndpoint(''));
     }
 
     public function testGetEndpointWithService(): void
@@ -86,12 +86,12 @@ class EnvironmentTest extends TestCase
 
         $this->assertEquals(
             'https://api.userede.com.br/erede/v2/transactions',
-            $prodEnv->getEndpoint('/transactions')
+            $prodEnv->getEndpoint('transactions')
         );
 
         $this->assertEquals(
             'https://sandbox-erede.useredecloud.com.br/v2/transactions',
-            $sandboxEnv->getEndpoint('/transactions')
+            $sandboxEnv->getEndpoint('transactions')
         );
     }
 
@@ -101,12 +101,12 @@ class EnvironmentTest extends TestCase
         $sandboxEnv = Environment::sandbox();
 
         $this->assertEquals(
-            'https://api.userede.com.br/erede/v2',
+            'https://api.userede.com.br/erede/v2/',
             $prodEnv->getEndpoint('')
         );
 
         $this->assertEquals(
-            'https://sandbox-erede.useredecloud.com.br/v2',
+            'https://sandbox-erede.useredecloud.com.br/v2/',
             $sandboxEnv->getEndpoint('')
         );
     }
@@ -118,12 +118,12 @@ class EnvironmentTest extends TestCase
 
         $this->assertEquals(
             'https://api.userede.com.br/erede/v2/transactions/123/capture',
-            $prodEnv->getEndpoint('/transactions/123/capture')
+            $prodEnv->getEndpoint('transactions/123/capture')
         );
 
         $this->assertEquals(
             'https://sandbox-erede.useredecloud.com.br/v2/transactions/123/capture',
-            $sandboxEnv->getEndpoint('/transactions/123/capture')
+            $sandboxEnv->getEndpoint('transactions/123/capture')
         );
     }
 
@@ -133,12 +133,12 @@ class EnvironmentTest extends TestCase
         $sandboxEnv = Environment::sandbox();
 
         $this->assertEquals(
-            'https://api.userede.com.br/erede/v2auth/token',
+            'https://api.userede.com.br/erede/v2/auth/token',
             $prodEnv->getEndpoint('auth/token')
         );
 
         $this->assertEquals(
-            'https://sandbox-erede.useredecloud.com.br/v2auth/token',
+            'https://sandbox-erede.useredecloud.com.br/v2/auth/token',
             $sandboxEnv->getEndpoint('auth/token')
         );
     }
@@ -270,7 +270,7 @@ class EnvironmentTest extends TestCase
     public function testProductionEndpointWithVariousServices(string $service, string $expectedSuffix): void
     {
         $env = Environment::production();
-        $expectedUrl = 'https://api.userede.com.br/erede/v2' . $expectedSuffix;
+        $expectedUrl = 'https://api.userede.com.br/erede/v2/' . $expectedSuffix;
 
         $this->assertEquals($expectedUrl, $env->getEndpoint($service));
     }
@@ -281,7 +281,7 @@ class EnvironmentTest extends TestCase
     public function testSandboxEndpointWithVariousServices(string $service, string $expectedSuffix): void
     {
         $env = Environment::sandbox();
-        $expectedUrl = 'https://sandbox-erede.useredecloud.com.br/v2' . $expectedSuffix;
+        $expectedUrl = 'https://sandbox-erede.useredecloud.com.br/v2/' . $expectedSuffix;
 
         $this->assertEquals($expectedUrl, $env->getEndpoint($service));
     }
@@ -353,8 +353,8 @@ class EnvironmentTest extends TestCase
         $this->assertInstanceOf(\Rede\Environment::class, $sandboxEnv);
 
         // 3. Test endpoints for common v2 API calls
-        $authEndpoint = $prodEnv->getEndpoint('/auth/token');
-        $transactionEndpoint = $sandboxEnv->getEndpoint('/transactions');
+        $authEndpoint = $prodEnv->getEndpoint('auth/token');
+        $transactionEndpoint = $sandboxEnv->getEndpoint('transactions');
 
         $this->assertTrue(strpos($authEndpoint, 'v2/auth/token') !== false);
         $this->assertTrue(strpos($transactionEndpoint, 'v2/transactions') !== false);

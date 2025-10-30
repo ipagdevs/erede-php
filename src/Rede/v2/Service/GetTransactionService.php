@@ -63,9 +63,9 @@ class GetTransactionService extends AbstractTransactionsService
         }
 
         if ($this->refund) {
-            return sprintf('%s/%s/refunds', parent::getService(), $this->transaction->getTid());
+            return sprintf('%s/%s/refunds', parent::getService(), $this->getTid());
         }
 
-        return sprintf('%s/%s', parent::getService(), $this->transaction->getTid());
+        return sprintf('%s/%s', parent::getService(), $this->getTid());
     }
 }

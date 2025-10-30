@@ -20,7 +20,7 @@ class Environment extends \Rede\Environment
      */
     private function __construct(string $baseUrl)
     {
-        $this->endpoint = sprintf('%s/%s', $baseUrl, self::VERSION);
+        $this->endpoint = sprintf('%s/%s/', $baseUrl, self::VERSION);
     }
 
     public function getEndpoint(string $service): string
