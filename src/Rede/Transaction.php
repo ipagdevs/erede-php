@@ -11,6 +11,7 @@ class Transaction implements RedeSerializable, RedeUnserializable
 {
     public const CREDIT = 'credit';
     public const DEBIT = 'debit';
+    public const PIX = 'pix';
 
     public const ORIGIN_EREDE = 1;
     public const ORIGIN_VISA_CHECKOUT = 4;
@@ -25,6 +26,16 @@ class Transaction implements RedeSerializable, RedeUnserializable
      * @var Authorization|null
      */
     private ?Authorization $authorization = null;
+
+    /**
+     * @var string|null
+     */
+    private ?string $orderId = null;
+
+    /**
+     * @var QrCode|null
+     */
+    private ?QrCode $qrCode = null;
 
     /**
      * @var string|null
@@ -330,6 +341,21 @@ class Transaction implements RedeSerializable, RedeUnserializable
         );
     }
 
+    public function pix(string $orderId): static
+    {
+        return $this->setPix(
+            $orderId,
+            Transaction::PIX
+        );
+    }
+
+    public function setPix(string $orderId, string $kind): static
+    {
+        $this->setOrderId($orderId);
+        $this->setKind($kind);
+        return $this;
+    }
+
     /**
      * @param bool $capture
      *
@@ -592,6 +618,44 @@ class Transaction implements RedeSerializable, RedeUnserializable
     }
 
     /**
+     * @return QrCode|null
+     */
+    public function getQrCode(): ?QrCode
+    {
+        return $this->qrCode;
+    }
+
+    /**
+     * @param string $dateTimeExpiration
+     *
+     * @return $this
+     */
+    public function setQrCode(string $dateTimeExpiration): static
+    {
+        $this->qrCode = (new QrCode())->setDateTimeExpiration($dateTimeExpiration);
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getOrderId(): ?string
+    {
+        return $this->orderId;
+    }
+
+    /**
+     * @param string orderId
+     *
+     * @return $this
+     */
+    public function setOrderId(string $orderId): static
+    {
+        $this->orderId = $orderId;
+        return $this;
+    }
+
+    /**
      * @return int|null
      */
     public function getInstallments(): ?int
@@ -797,6 +861,11 @@ class Transaction implements RedeSerializable, RedeUnserializable
     public function iata(string $code, string $departureTax): static
     {
         return $this->setIata($code, $departureTax);
+    }
+
+    public function qrCode(string $dateTimeExpiration): static
+    {
+        return $this->setQrCode($dateTimeExpiration);
     }
 
     /**
