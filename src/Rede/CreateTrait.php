@@ -33,7 +33,7 @@ trait CreateTrait
     private static function mapPropertyToObject($property, mixed $value): mixed
     {
         return match ($property) {
-            'requestDateTime', 'dateTime', 'refundDateTime' => new DateTime($value),
+            'requestDateTime', 'dateTime', 'refundDateTime', 'expirationQrCode' => new DateTime($value),
             'brand' => Brand::create($value),
             'billing' => Billing::create($value),
             default => $value,

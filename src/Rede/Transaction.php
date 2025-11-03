@@ -213,6 +213,13 @@ class Transaction implements RedeSerializable, RedeUnserializable
     private ?int $amount = null;
 
     /**
+     * @var array<StatusHistory>|null
+     */
+    private ?array $statusHistory = null;
+
+    private ?string $txId = null;
+
+    /**
      * Transaction constructor.
      *
      * @param int|float|null $amount
@@ -405,7 +412,9 @@ class Transaction implements RedeSerializable, RedeUnserializable
                 'storageCard' => $this->storageCard,
                 'urls' => $this->urls,
                 'iata' => $this->iata,
-                'additional' => $this->additional
+                'additional' => $this->additional,
+                'qrCode' => $this->qrCode,
+                'statusHistory' => $this->statusHistory,
             ],
             function ($value) {
                 return !empty($value);
@@ -772,6 +781,19 @@ class Transaction implements RedeSerializable, RedeUnserializable
     }
 
     /**
+     * @return StatusHistory[]
+     */
+    public function getStatusHistory(): array
+    {
+        return $this->statusHistory;
+    }
+
+    public function getTxid(): ?string
+    {
+        return $this->txId;
+    }
+
+    /**
      * @return DateTime|null
      */
     public function getRequestDateTime(): ?DateTime
@@ -1069,6 +1091,8 @@ class Transaction implements RedeSerializable, RedeUnserializable
                 'threeDSecure' => $this->unserializeThreeDSecure($property, $value),
                 'requestDateTime', 'dateTime', 'refundDateTime' => $this->unserializeRequestDateTime($property, $value),
                 'brand' => $this->unserializeBrand($property, $value),
+                'qrCodeResponse' => $this->unserializeQrCodeResponse($property, $value),
+                'statusHistory' => $this->unserializeStatusHistory($property, $value),
                 default => $this->{$property} = $value,
             };
         }
@@ -1216,6 +1240,34 @@ class Transaction implements RedeSerializable, RedeUnserializable
             $brand = Brand::create($value);
 
             $this->brand = $brand;
+        }
+    }
+
+    private function unserializeQrCodeResponse(string $property, mixed $value): void
+    {
+        if ($property == 'qrCodeResponse') {
+            /**
+             * @var QrCode $qrCode
+             * @var Authorization $authorization
+             */
+            $qrCode = QrCode::create($value);
+            $authorization = Authorization::create($value);
+
+            $this->qrCode = $qrCode;
+            $this->authorization = $authorization;
+        }
+    }
+
+    public function unserializeStatusHistory(string $property, mixed $value): void
+    {
+        if ($property == 'statusHistory' && is_array($value)) {
+            $this->statusHistory = [];
+
+
+            foreach ($value as $statusHistoryValue) {
+                $statusHistory = StatusHistory::create($statusHistoryValue);
+                $this->statusHistory[] = $statusHistory;
+            }
         }
     }
 }

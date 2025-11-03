@@ -317,14 +317,6 @@ class eRedeTest extends TestCase
         }
     }
 
-    public function testShouldCreateQrCodePix()
-    {
-        $transaction = (new Transaction(10.00, $this->generateReferenceNumber()))->pix(
-            'pedido-pix-001'
-        )->qrCode('2024-12-31T23:59:59-03:00');
-        die(var_dump($transaction));
-    }
-
     /**
      * @return Transaction
      */

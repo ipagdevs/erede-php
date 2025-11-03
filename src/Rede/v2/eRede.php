@@ -150,6 +150,20 @@ class eRede extends \Rede\eRede implements eRedeInterface
         return $service->execute();
     }
 
+    public function getRefundByRefundId(string $tid, string $refundId): Transaction
+    {
+        $service = new GetTransactionService(
+            store: $this->store,
+            logger: $this->logger
+        );
+        $service->platform($this->platform, $this->platformVersion);
+        $service->setTid($tid);
+        $service->setRefundId($refundId);
+        $service->setRefundByRefundId($refundId);
+
+        return $service->execute();
+    }
+
     /**
      * @param Transaction $transaction
      *

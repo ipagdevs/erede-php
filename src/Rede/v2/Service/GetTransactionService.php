@@ -20,6 +20,11 @@ class GetTransactionService extends AbstractTransactionsService
     private bool $refund = false;
 
     /**
+     * @var bool
+     */
+    private bool $refundByRefundId = false;
+
+    /**
      * @return Transaction
      * @throws InvalidArgumentException
      * @throws RuntimeException
@@ -53,6 +58,14 @@ class GetTransactionService extends AbstractTransactionsService
         return $this;
     }
 
+    public function setRefundByRefundId(bool $refundByRefundId = true): static
+    {
+        $this->refundByRefundId = $refundByRefundId;
+
+        return $this;
+    }
+
+
     /**
      * @return string
      */
@@ -64,6 +77,10 @@ class GetTransactionService extends AbstractTransactionsService
 
         if ($this->refund) {
             return sprintf('%s/%s/refunds', parent::getService(), $this->getTid());
+        }
+
+        if ($this->refundByRefundId) {
+            return sprintf('%s/%s/refunds/%s', parent::getService(), $this->getTid(), $this->getRefundId());
         }
 
         return sprintf('%s/%s', parent::getService(), $this->getTid());

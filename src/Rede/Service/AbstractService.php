@@ -3,13 +3,13 @@
 namespace Rede\Service;
 
 use CurlHandle;
-use InvalidArgumentException;
-use Psr\Log\LoggerInterface;
 use Rede\eRede;
-use Rede\Exception\RedeException;
 use Rede\Store;
 use Rede\Transaction;
 use RuntimeException;
+use Psr\Log\LoggerInterface;
+use InvalidArgumentException;
+use Rede\Exception\RedeException;
 
 abstract class AbstractService
 {
@@ -33,9 +33,7 @@ abstract class AbstractService
      * @param Store                $store
      * @param LoggerInterface|null $logger
      */
-    public function __construct(protected Store $store, protected ?LoggerInterface $logger = null)
-    {
-    }
+    public function __construct(protected Store $store, protected ?LoggerInterface $logger = null) {}
 
     /**
      * @param string|null $platform
