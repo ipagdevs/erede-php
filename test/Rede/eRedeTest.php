@@ -3,12 +3,12 @@
 namespace Rede;
 
 // Configuração da loja em modo produção
-use Monolog\Handler\StreamHandler;
 use Monolog\Level;
 use Monolog\Logger;
-use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
 use RuntimeException;
+use Psr\Log\LoggerInterface;
+use PHPUnit\Framework\TestCase;
+use Monolog\Handler\StreamHandler;
 
 /**
  * Class eRedeTest

@@ -21,6 +21,7 @@ abstract class AbstractTransactionsService extends AbstractService
      * @var string
      */
     private string $tid = '';
+    private ?string $refundId = '';
 
     /**
      * AbstractTransactionsService constructor.
@@ -68,6 +69,17 @@ abstract class AbstractTransactionsService extends AbstractService
     public function setTid(string $tid): static
     {
         $this->tid = $tid;
+        return $this;
+    }
+
+    public function getRefundId(): ?string
+    {
+        return $this->refundId;
+    }
+
+    public function setRefundId(?string $refundId): static
+    {
+        $this->refundId = $refundId;
         return $this;
     }
 

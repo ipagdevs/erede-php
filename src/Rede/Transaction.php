@@ -11,6 +11,7 @@ class Transaction implements RedeSerializable, RedeUnserializable
 {
     public const CREDIT = 'credit';
     public const DEBIT = 'debit';
+    public const PIX = 'pix';
 
     public const ORIGIN_EREDE = 1;
     public const ORIGIN_VISA_CHECKOUT = 4;
@@ -25,6 +26,16 @@ class Transaction implements RedeSerializable, RedeUnserializable
      * @var Authorization|null
      */
     private ?Authorization $authorization = null;
+
+    /**
+     * @var string|null
+     */
+    private ?string $orderId = null;
+
+    /**
+     * @var QrCode|null
+     */
+    private ?QrCode $qrCode = null;
 
     /**
      * @var string|null
@@ -202,6 +213,13 @@ class Transaction implements RedeSerializable, RedeUnserializable
     private ?int $amount = null;
 
     /**
+     * @var array<StatusHistory>|null
+     */
+    private ?array $statusHistory = null;
+
+    private ?string $txId = null;
+
+    /**
      * Transaction constructor.
      *
      * @param int|float|null $amount
@@ -330,6 +348,21 @@ class Transaction implements RedeSerializable, RedeUnserializable
         );
     }
 
+    public function pix(string $orderId): static
+    {
+        return $this->setPix(
+            $orderId,
+            Transaction::PIX
+        );
+    }
+
+    public function setPix(string $orderId, string $kind): static
+    {
+        $this->setOrderId($orderId);
+        $this->setKind($kind);
+        return $this;
+    }
+
     /**
      * @param bool $capture
      *
@@ -379,7 +412,9 @@ class Transaction implements RedeSerializable, RedeUnserializable
                 'storageCard' => $this->storageCard,
                 'urls' => $this->urls,
                 'iata' => $this->iata,
-                'additional' => $this->additional
+                'additional' => $this->additional,
+                'qrCode' => $this->qrCode,
+                'statusHistory' => $this->statusHistory,
             ],
             function ($value) {
                 return !empty($value);
@@ -592,6 +627,44 @@ class Transaction implements RedeSerializable, RedeUnserializable
     }
 
     /**
+     * @return QrCode|null
+     */
+    public function getQrCode(): ?QrCode
+    {
+        return $this->qrCode;
+    }
+
+    /**
+     * @param string $dateTimeExpiration
+     *
+     * @return $this
+     */
+    public function setQrCode(string $dateTimeExpiration): static
+    {
+        $this->qrCode = (new QrCode())->setDateTimeExpiration($dateTimeExpiration);
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getOrderId(): ?string
+    {
+        return $this->orderId;
+    }
+
+    /**
+     * @param string orderId
+     *
+     * @return $this
+     */
+    public function setOrderId(string $orderId): static
+    {
+        $this->orderId = $orderId;
+        return $this;
+    }
+
+    /**
      * @return int|null
      */
     public function getInstallments(): ?int
@@ -708,6 +781,19 @@ class Transaction implements RedeSerializable, RedeUnserializable
     }
 
     /**
+     * @return StatusHistory[]
+     */
+    public function getStatusHistory(): array
+    {
+        return $this->statusHistory;
+    }
+
+    public function getTxid(): ?string
+    {
+        return $this->txId;
+    }
+
+    /**
      * @return DateTime|null
      */
     public function getRequestDateTime(): ?DateTime
@@ -797,6 +883,11 @@ class Transaction implements RedeSerializable, RedeUnserializable
     public function iata(string $code, string $departureTax): static
     {
         return $this->setIata($code, $departureTax);
+    }
+
+    public function qrCode(string $dateTimeExpiration): static
+    {
+        return $this->setQrCode($dateTimeExpiration);
     }
 
     /**
@@ -1000,6 +1091,8 @@ class Transaction implements RedeSerializable, RedeUnserializable
                 'threeDSecure' => $this->unserializeThreeDSecure($property, $value),
                 'requestDateTime', 'dateTime', 'refundDateTime' => $this->unserializeRequestDateTime($property, $value),
                 'brand' => $this->unserializeBrand($property, $value),
+                'qrCodeResponse' => $this->unserializeQrCodeResponse($property, $value),
+                'statusHistory' => $this->unserializeStatusHistory($property, $value),
                 default => $this->{$property} = $value,
             };
         }
@@ -1147,6 +1240,34 @@ class Transaction implements RedeSerializable, RedeUnserializable
             $brand = Brand::create($value);
 
             $this->brand = $brand;
+        }
+    }
+
+    private function unserializeQrCodeResponse(string $property, mixed $value): void
+    {
+        if ($property == 'qrCodeResponse') {
+            /**
+             * @var QrCode $qrCode
+             * @var Authorization $authorization
+             */
+            $qrCode = QrCode::create($value);
+            $authorization = Authorization::create($value);
+
+            $this->qrCode = $qrCode;
+            $this->authorization = $authorization;
+        }
+    }
+
+    public function unserializeStatusHistory(string $property, mixed $value): void
+    {
+        if ($property == 'statusHistory' && is_array($value)) {
+            $this->statusHistory = [];
+
+
+            foreach ($value as $statusHistoryValue) {
+                $statusHistory = StatusHistory::create($statusHistoryValue);
+                $this->statusHistory[] = $statusHistory;
+            }
         }
     }
 }

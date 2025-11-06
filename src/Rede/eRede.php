@@ -3,10 +3,10 @@
 namespace Rede;
 
 use Psr\Log\LoggerInterface;
-use Rede\Service\CancelTransactionService;
-use Rede\Service\CaptureTransactionService;
-use Rede\Service\CreateTransactionService;
 use Rede\Service\GetTransactionService;
+use Rede\Service\CancelTransactionService;
+use Rede\Service\CreateTransactionService;
+use Rede\Service\CaptureTransactionService;
 
 /**
  * phpcs:disable Squiz.Classes.ValidClassName.NotCamelCaps
@@ -32,9 +32,7 @@ class eRede
      * @param Store                $store
      * @param LoggerInterface|null $logger
      */
-    public function __construct(private readonly Store $store, private readonly ?LoggerInterface $logger = null)
-    {
-    }
+    public function __construct(private readonly Store $store, private readonly ?LoggerInterface $logger = null) {}
 
     /**
      * @param Transaction $transaction

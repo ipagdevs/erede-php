@@ -97,6 +97,10 @@ class Authorization
      * @var Brand|null
      */
     private ?Brand $brand = null;
+    /**
+     * @var string|null
+     */
+    private ?string $txId = null;
 
     /**
      * @return string|null
@@ -419,6 +423,24 @@ class Authorization
     public function setBrand(?Brand $brand): static
     {
         $this->brand = $brand;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getTxId(): ?string
+    {
+        return $this->txId;
+    }
+
+    /**
+     * @param string|null $txId 
+     * @return $this
+     */
+    public function setTxId(?string $txId): static
+    {
+        $this->txId = $txId;
         return $this;
     }
 }
