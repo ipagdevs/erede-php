@@ -7,12 +7,11 @@ class Url implements RedeSerializable
     use SerializeTrait;
 
     public const CALLBACK = 'callback';
-    public const THREE_D_SECURE_FAILURE = 'threeDSecureFailure';
-    public const THREE_D_SECURE_SUCCESS = 'threeDSecureSuccess';
+    public const THREE_D_SECURE_FAILURE  = 'threeDSecureFailure';
+    public const THREE_D_SECURE_SUCCESS  = 'threeDSecureSuccess';
+    public const THREE_D_SECURE_CALLBACK = 'threeDSecureCallback';
 
-    public function __construct(private string $url, private string $kind = Url::CALLBACK)
-    {
-    }
+    public function __construct(private string $url, private string $kind = Url::CALLBACK) {}
 
     /**
      * @return string
