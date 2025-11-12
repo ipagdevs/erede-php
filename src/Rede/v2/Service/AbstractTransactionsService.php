@@ -30,7 +30,7 @@ abstract class AbstractTransactionsService extends AbstractService
      * @param Transaction|null     $transaction
      * @param LoggerInterface|null $logger
      */
-    public function __construct(Store $store, Transaction $transaction = null, LoggerInterface $logger = null)
+    public function __construct(Store $store, ?Transaction $transaction = null, ?LoggerInterface $logger = null)
     {
         parent::__construct($store, $logger);
 
@@ -117,11 +117,15 @@ abstract class AbstractTransactionsService extends AbstractService
         }
 
         if ($statusCode >= 400) {
-            throw new RedeException(
+            $exception = new RedeException(
                 $this->transaction->getReturnMessage() ?? 'Error on getting the content from the API',
                 (int)$this->transaction->getReturnCode(),
                 $previous
             );
+
+            $exception->setBrand($this->transaction->getBrand());
+
+            throw $exception;
         }
 
         return $this->transaction;
